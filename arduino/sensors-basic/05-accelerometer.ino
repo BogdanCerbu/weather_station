@@ -56,7 +56,7 @@ void loop()
     u8x8.print(x); // Print temperature to OLED display. Cursor moves
                              // to the right after printing
     u8x8.print("g"); // Print "C" to OLED display
-    u8x8.setCuror(0, 10); // Set cursor position on OLED display
+    u8x8.setCursor(0, 10); // Set cursor position on OLED display
     u8x8.print("Y:"); // Print pressure to OLED display at cursor position
     u8x8.print(y); // Print pressure to OLED display. Cursor moves to the
                           // right after printing
