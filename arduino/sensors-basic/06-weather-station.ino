@@ -41,7 +41,7 @@
 
 const int waitErrorMs = 1000; // Wait time before retrying sensor initialization
 const int waitMs = 200; // Delay between readings
-
+const int ledPin =4;
 const int sensorPin = A6; // Light sensor PIN
 const int soundPin = A2; // Sound sensor PIN
 DHT dht(DHT20); // Create a DHT object using the DHT20 constant
@@ -51,12 +51,24 @@ LIS3DHTR<TwoWire> LIS; // Configurează I2C în hardware
 
 void setup(void)
 { // Setup, runs only once, after reset or power on:
+    pinMode(ledPin, OUTPUT); // Set LED pin as output
+    pinMode(sensorPin, INPUT);    
     DEBUG_BEGIN; // Start serial monitor, if DEBUG is enabled
-    /**
-     * Fill in the initialization code for the light and sound sensors.
-     */
     Wire.begin(); // Start I2C bus
     dht.begin(); // Start DHT sensor
+    while (!bmp280.init()) // Initialize BMP280 sensor
+    { // If sensor could not be initialized, print error message
+        DEBUG_PRINTLN("Sensor could not be found. Check wiring.");
+        delay(waitErrorMs); // Wait before retrying
+    }
+    DEBUG_PRINTLN("Sensor initialized.");
+    LIS.begin(Wire, 0x19);
+    do {
+        DEBUG_PRINTLN("Așteptare senzor...");
+        delay(waitErrorMs);
+    } while (!LIS);
+    LIS.setOutputDataRate(LIS3DHTR_DATARATE_50HZ);
+    DEBUG_PRINTLN("Senzor conectat.");
     /**
      * Fill in the initialization code for the pressure and accelerometer
      * sensors.
@@ -73,23 +85,37 @@ void loop(void)
     float accelX, accelY, accelZ;
 
     light = (float)analogRead(sensorPin) / 1023; // Read light sensor value
+    sound = analogRead(soundPin);
     /**
      * Fill in the code to read the sound sensor value.
      */
     temp_h = dht.readTemperature(); // Read temperature sensor value
+    humidity = dht.readHumidity();
     /**
      * Fill in the code to read the humidity sensor value.
      */
     temp_p = bmp280.getTemperature(); // Read temperature sensor value
+    pressure = bmp280.getPressure();
     /**
      * Fill in the code to read the pressure sensor value.
      */
     altitude = bmp280.calcAltitude(pressure); // Read altitude sensor value
     accelX = LIS.getAccelerationX(); // Read X acceleration sensor value
+    accelY = LIS.getAccelerationY();
+    accelZ = LIS.getAccelerationZ();
     /**
      * Fill in the code to read the Y and Z acceleration sensor values.
      */
-
+    DEBUG_PRINT(light); DEBUG_PRINT(",");
+    DEBUG_PRINT(sound); DEBUG_PRINT(",");
+    DEBUG_PRINT(temp_h); DEBUG_PRINT(",");
+    DEBUG_PRINT(humidity); DEBUG_PRINT(",");
+    DEBUG_PRINT(temp_p); DEBUG_PRINT(",");
+    DEBUG_PRINT(pressure); DEBUG_PRINT(",");
+    DEBUG_PRINT(altitude); DEBUG_PRINT(",");
+    DEBUG_PRINT(accelX); DEBUG_PRINT(",");
+    DEBUG_PRINT(accelY); DEBUG_PRINT(",");
+    DEBUG_PRINTLN(accelZ); 
     /**
      * Fill in the code to print the sensor values in CSV format to the serial
      */ 
